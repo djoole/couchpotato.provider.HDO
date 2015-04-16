@@ -1,16 +1,16 @@
-from .main import HDO
+from .main import hdonly
 
 def autoload():
-    return HDO()
+    return hdonly()
 
 config = [{
-    'name': 'HDO',
+    'name': 'hdonly',
     'groups': [
         {
             'tab': 'searcher',
             'list': 'torrent_providers',
-            'name': 'HDO',
-            'description': 'See <a href="https://hd-only.org/">HD-Only</a>',
+            'name': 'HD-Only',
+            'description': 'See <a href="https://hd-only.org/">HD-Only.org</a>',
             'wizard': True,
             'options': [
                 {
@@ -49,11 +49,11 @@ config = [{
                     'description': 'Will ignore results without VFQ audio track if checked',
                 },                 
                 {
-                    'name': 'ignore_year',
-                    'label': 'ignore year',
+                    'name': 'x265',
+                    'label': 'x265 mandatory',
                     'default': 0,
                     'type': 'bool',
-                    'description': 'Will ignore the year in the search results',
+                    'description': 'Will ignore results not encoded with x265 if checked',
                 },
                 {
                     'name': 'seed_ratio',
