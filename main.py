@@ -62,16 +62,27 @@ class hdonly(TorrentProvider, MovieProvider):
                     size = tryInt(torrent['size']) / 1024 / 1024
                     seeders = tryInt(torrent['seeders'])
                     leechers = tryInt(torrent['leechers'])
-                    detail = self.getJsonData(detail_url)['response']['torrent']['fileList'] + self.getJsonData(detail_url)['response']['torrent']['filePath']
-                    if (self.conf('vf') and ('VF' not in detail.replace('VFQ',''))):
+                    if not self.getJsonData(detail_url)['response']['torrent']['filePath']:
+                        detail = self.getJsonData(detail_url)['response']['torrent']['fileList'].lower()
+                    else:
+                        detail = self.getJsonData(detail_url)['response']['torrent']['filePath'].lower()
+                    log.debug('Filename is %s' % detail)
+                    if (self.conf('vf') and not (('vf' in detail.replace('vfq','')) or ('multi' in detail.replace('vfq','')))):
+                        log.debug('VF mandatory checked, ignoring torrent %s' % id)
                         continue
-                    if (self.conf('vfq') and ('VFQ' not in detail)):
+                    if (self.conf('vfq') and ('vfq' not in detail)):
+                        log.debug('VFQ mandatory checked, ignoring torrent %s' % id)
                         continue
-                    if (self.conf('vo') and ('VO' not in detail)):
+                    if (self.conf('vo') and not (('vo' in detail) or ('multi' in detail))):
+                        log.debug('VO mandatory checked, ignoring torrent %s' % id)
+                        continue
+                    if (self.conf('multi') and ('multi' not in detail)):
+                        log.debug('MULTI mandatory checked, ignoring torrent %s' % id)
                         continue
                     if (self.conf('x265') and ('x265' not in detail)):
+                        log.debug('x265 mandatory checked, ignoring torrent %s' % id)
                         continue
-                    log.debug('Torrent added to results : id %s; name %s; url %s; detail_url %s; size %s; seeders %s; leechers %s' % (id, name, url, detail_url, size, seeders, leechers))
+                    log.debug('Torrent added to results : id %s; name %s; detail_url %s; size %s; seeders %s; leechers %s' % (id, name, detail_url, size, seeders, leechers))
                     results.append({
                         'id': id,
                         'name': name,
