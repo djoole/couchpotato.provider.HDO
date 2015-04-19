@@ -19,6 +19,7 @@ Options available :
 - Download only torrents with at least a VO audio track
 - Download only torrents with at least a VF audio track
 - Download only torrents with at least a VFQ audio track
+- Download only torrents with MULTI (VO and VF) audio tracks
 - Download only torrents with x265 encoding
 
 #Contribute/Issues
