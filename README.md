@@ -5,11 +5,12 @@ HD-Only Torrent Provider integration into CouchPotato.
 
 1. Go to your custom_plugins folder, which is located within your config folder.
 See Settings->About->Directories (second folder is your config folder) for location.
-2. Enter this command : *git clone https://github.com/djoole/couchpotato.provider.HDO.git hdonly*
+2. Enter this command : *git clone https://github.com/djoole/couchpotato.provider.HDO.git .*
 
 Or if you don't have git :
 1. Make a folder named hdonly in your custom_plugins folder
 2. Place the init.py and main.py file inside this hdonly folder.
+3. Place the detectlang folder in your custom_plugins folder
 
 #How-to use
 
