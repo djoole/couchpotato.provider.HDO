@@ -35,7 +35,6 @@ class hdonly(TorrentProvider, MovieProvider):
         titles = []
         frtitle=''
         for t in movie['info']['titles']:
-            log.debug('***** t = %s' % t)
             t = t.lower()
             try:
                 if detect(t) == 'fr' and t not in titles:
@@ -43,7 +42,6 @@ class hdonly(TorrentProvider, MovieProvider):
                     frtitle = t
             except:
                 log.error('Failed to detect FR titles : %s' % (traceback.format_exc()))
-        log.debug('$$$$$$$$$$$$$$$$$$ title = %s' % title)
         titles.append(title.lower())
         for t in movie['info']['titles']:
             t = t.lower()
