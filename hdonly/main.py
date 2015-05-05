@@ -33,16 +33,25 @@ class hdonly(TorrentProvider, MovieProvider):
         passkey = index['response']['passkey']
 
         titles = []
+        frtitle=''
         for t in movie['info']['titles']:
+            log.debug('***** t = %s' % t)
             t = t.lower()
-            if detect(t) == 'fr' and t not in titles:
-                titles.append(t)
-                frtitle = t
+            try:
+                if detect(t) == 'fr' and t not in titles:
+                    titles.append(t)
+                    frtitle = t
+            except:
+                log.error('Failed to detect FR titles : %s' % (traceback.format_exc()))
+        log.debug('$$$$$$$$$$$$$$$$$$ title = %s' % title)
         titles.append(title.lower())
         for t in movie['info']['titles']:
             t = t.lower()
-            if detect(t) == 'en' and t not in titles:
-                titles.append(t)
+            try:
+                if detect(t) == 'en' and t not in titles:
+                    titles.append(t)
+            except:
+                log.error('Failed to detect EN titles : %s' % (traceback.format_exc()))
         log.debug('movie titles : %s' % titles)		
 
         for t in titles:
