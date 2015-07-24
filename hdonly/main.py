@@ -103,7 +103,7 @@ class hdonly(TorrentProvider, MovieProvider):
                         'seeders': seeders,
                         'leechers': leechers
                         })
-                        return
+                return
             except:
                 log.error('Failed to parse HD-Only: %s' % (traceback.format_exc()))
 
