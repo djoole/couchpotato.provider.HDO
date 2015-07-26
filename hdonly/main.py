@@ -67,12 +67,18 @@ class hdonly(TorrentProvider, MovieProvider):
                     if not data['response']['results']:
                         log.debug('No result from HD-Only with this title : %s' % t)
                         continue
-                    release_name = h.unescape(data['response']['results'][0]['groupName'])
+                    for res in data['response']['results']:
+                        release_name = h.unescape(res['groupName']).lower()
+                        log.debug('release name check : %s' % release_name)
+                        if release_name in titles:
+                            log.debug('Got it : %s' % release_name)
+                            result = res
+                            break
                     if 'the' not in release_name.lower() and (splittedTitle[-1] == 'the' or splittedTitle[0] == 'the'):
                         release_name = 'the.' + release_name.lower().replace(' ','.')
-                    for torrent in data['response']['results'][0]['torrents']:
+                    for torrent in result['torrents']:
                         id = torrent['torrentId']
-                        name = release_name + '.' + str(data['response']['results'][0]['groupYear']) + '.' + torrent['encoding'] + '.' + torrent['media'] + '.' + torrent['format']
+                        name = release_name + '.' + str(result['groupYear']) + '.' + torrent['encoding'] + '.' + torrent['media'] + '.' + torrent['format']
                         url = self.urls['download'] % (torrent['torrentId'], authkey, passkey)
                         detail_url = self.urls['detail'] % id
                         size = tryInt(torrent['size']) / 1024 / 1024
