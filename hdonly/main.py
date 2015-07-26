@@ -6,6 +6,7 @@ from couchpotato.core.media._base.providers.torrent.base import TorrentProvider
 from couchpotato.core.media.movie.providers.base import MovieProvider
 import traceback
 import json
+from HTMLParser import HTMLParser
 
 log = CPLog(__name__)
 
@@ -28,6 +29,8 @@ class hdonly(TorrentProvider, MovieProvider):
 	
     def _searchOnTitle(self, title, movie, quality, results):
 
+        h = HTMLParser()
+
         index = self.getJsonData(self.urls['index'])
         authkey = index['response']['authkey']
         passkey = index['response']['passkey']
@@ -38,18 +41,20 @@ class hdonly(TorrentProvider, MovieProvider):
             t = t.lower()
             try:
                 if detect(t) == 'fr' and t not in titles:
+                    log.debug('found this FR title : %s' % t)
                     titles.append(t)
                     frtitle = t
             except:
-                log.error('Failed to detect FR titles : %s' % (traceback.format_exc()))
+                log.debug('')
         titles.append(title.lower())
         for t in movie['info']['titles']:
             t = t.lower()
             try:
                 if detect(t) == 'en' and t not in titles:
+                    log.debug('found this EN title : %s' % t)
                     titles.append(t)
             except:
-                log.error('Failed to detect EN titles : %s' % (traceback.format_exc()))
+                log.debug('')
         log.debug('movie titles : %s' % titles)		
 
         for t in titles:
@@ -62,7 +67,7 @@ class hdonly(TorrentProvider, MovieProvider):
                     if not data['response']['results']:
                         log.debug('No result from HD-Only with this title : %s' % t)
                         continue
-                    release_name = data['response']['results'][0]['groupName']
+                    release_name = h.unescape(data['response']['results'][0]['groupName'])
                     if 'the' not in release_name.lower() and (splittedTitle[-1] == 'the' or splittedTitle[0] == 'the'):
                         release_name = 'the.' + release_name.lower().replace(' ','.')
                     for torrent in data['response']['results'][0]['torrents']:
@@ -77,6 +82,7 @@ class hdonly(TorrentProvider, MovieProvider):
                             detail = self.getJsonData(detail_url)['response']['torrent']['fileList'].lower()
                         else:
                             detail = self.getJsonData(detail_url)['response']['torrent']['filePath'].lower()
+                        detail = h.unescape(detail)
                         log.debug('Filename is %s' % detail)
                         if (self.conf('vf') and not (('vf' in detail.replace('vfq','')) or ('multi' in detail.replace('vfq',''))) and t != frtitle):
                             log.debug('VF mandatory checked, ignoring torrent %s' % id)
