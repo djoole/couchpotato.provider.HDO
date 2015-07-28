@@ -37,6 +37,7 @@ class hdonly(TorrentProvider, MovieProvider):
 
         titles = []
         frtitle=''
+        titles.append(title.lower())
         for t in movie['info']['titles']:
             t = t.lower()
             try:
@@ -46,7 +47,6 @@ class hdonly(TorrentProvider, MovieProvider):
                     frtitle = t
             except:
                 log.debug('')
-        titles.append(title.lower())
         for t in movie['info']['titles']:
             t = t.lower()
             try:
