@@ -26,7 +26,7 @@ class hdonly(TorrentProvider, MovieProvider):
     http_time_between_calls = 1 #seconds
     cat_backup_id = None
 
-	
+
     def _searchOnTitle(self, title, movie, quality, results):
 
         h = HTMLParser()
@@ -55,7 +55,7 @@ class hdonly(TorrentProvider, MovieProvider):
                     titles.append(t)
             except:
                 log.debug('')
-        log.debug('movie titles : %s' % titles)		
+        log.debug('movie titles : %s' % titles)
 
         for t in titles:
             log.debug('Searching HD-Only for %s' % t)
@@ -90,6 +90,9 @@ class hdonly(TorrentProvider, MovieProvider):
                             detail = self.getJsonData(detail_url)['response']['torrent']['filePath'].lower()
                         detail = h.unescape(detail)
                         log.debug('Filename is %s' % detail)
+                        if (seeders == 0):
+                            log.debug('0 seeders, ignoring torrent %s' % id)
+                            continue
                         if (self.conf('vf') and not (('vf' in detail.replace('vfq','')) or ('multi' in detail.replace('vfq',''))) and t != frtitle):
                             log.debug('VF mandatory checked, ignoring torrent %s' % id)
                             continue
