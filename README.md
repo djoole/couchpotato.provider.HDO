@@ -10,7 +10,6 @@ See Settings->About->Directories (second folder is your config folder) for locat
 Or if you don't have git :
 1. Make a folder named hdonly in your custom_plugins folder
 2. Place the init.py and main.py file inside this hdonly folder.
-3. Place the detectlang folder in your custom_plugins folder
 
 #How-to use
 
