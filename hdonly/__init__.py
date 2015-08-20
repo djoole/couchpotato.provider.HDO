@@ -28,6 +28,13 @@ config = [{
                     'type': 'password',
                 },
                 {
+                    'name': 'ignoreyear',
+                    'label': 'Ignore Year',
+                    'default': 0,
+                    'type': 'bool',
+                    'description': 'Won\'t use the release year to narrow the search if checked',
+                },
+                {
                     'name': 'vo',
                     'label': 'VO mandatory',
                     'default': 1,

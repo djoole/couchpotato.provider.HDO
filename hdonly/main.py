@@ -19,7 +19,7 @@ class hdonly(TorrentProvider, MovieProvider):
         'login' : baseurl + 'login.php',
         'login_check' : baseurl,
         'index' : baseurl + 'ajax.php?action=index',
-        'search' : baseurl + 'ajax.php?action=browse&searchstr=%s&year=%s',
+        'search' : baseurl + 'ajax.php?action=browse&searchstr=%s',
         'detail' : baseurl + 'ajax.php?action=torrent&id=%s',
         'download' : baseurl + 'torrents.php?action=download&id=%s&authkey=%s&torrent_pass=%s'
     }
@@ -44,7 +44,10 @@ class hdonly(TorrentProvider, MovieProvider):
 
         log.debug('Searching HD-Only for ' + title)
         request = urllib2.quote(title.encode('iso-8859-1'))
-        searchUrl = self.urls['search'] % (request, movieYear)
+        if (self.conf('ignoreyear')):
+            searchUrl = self.urls['search'] % request
+        else:
+            searchUrl = (self.urls['search'] + '&year=%s') % (request, movieYear)
         data = self.getJsonData(searchUrl)
         #log.debug('******* data : ')
         #log.debug(data)
@@ -55,10 +58,14 @@ class hdonly(TorrentProvider, MovieProvider):
             #log.debug(titles)
             log.debug('Searching HD-Only for ' + frTitle)
             request = urllib2.quote(frTitle.encode('iso-8859-1'))
-            searchUrl = self.urls['search'] % (frTitle, movieYear)
+            if (self.conf('ignoreyear')):
+                searchUrl = self.urls['search'] % frTitle
+            else:
+                searchUrl = (self.urls['search'] + '&year=%s') % (frTitle, movieYear)
             frData = self.getJsonData(searchUrl)
-            #log.debug('******* frData : ')
-            #log.debug(frData)
+            log.debug('******* searchUrl : ' + searchUrl)
+            log.debug('******* frData : ')
+            log.debug(frData)
             totalData = combine(frData, data)
             data = totalData
             #log.debug('***************************')
@@ -113,10 +120,11 @@ class hdonly(TorrentProvider, MovieProvider):
                         if (self.conf('x265') and ('x265' not in detail)):
                             log.debug('x265 mandatory checked, ignoring torrent %s' % id)
                             continue
-                        log.debug('Torrent added to results : id %s; name %s; detail_url %s; size %s; seeders %s; leechers %s' % (id, name, detail_url, size, seeders, leechers))
+                        log.debug('Torrent added to results : id %s; name %s; detail_url %s; size %s; seeders %s; leechers %s' % (id, replaceTitle(name, title, frTitle), detail_url, size, 
+seeders, leechers))
                         results.append({
                         'id': id,
-                        'name': name,
+                        'name': replaceTitle(name, title, frTitle),
                         'url': url,
                         'detail_url': detail_url,
                         'size': size,
@@ -191,4 +199,42 @@ def combine(dict1, dict2):
     #log.debug('combined dict is :')
     #log.debug(combdict)
     return combdict
+
+
+def replaceTitle(releaseNameI, titleI, newTitleI):
+    """
+    This function is replacing the title in the release name by the old one,
+    so that couchpotato recognise it as a valid release.
+    """
+
+    if newTitleI is None: # if the newTitle is empty, do nothing
+        return releaseNameI
+    else:
+        # input as lower case
+        releaseName = releaseNameI.lower()
+        title = titleI.lower()
+        newTitle = newTitleI.lower()
+        separatedWords = []
+        for s in releaseName.split(' '):
+            separatedWords.extend(s.split('.'))
+        # test how far the release name corresponds to the original title
+        index = 0
+        while separatedWords[index] in title.split(' '):
+            index += 1
+        # test how far the release name corresponds to the new title
+        newIndex = 0
+        while separatedWords[newIndex] in newTitle.split(' '):
+            newIndex += 1
+        # then determine if it correspoinds to the new title or old title
+        if index >= newIndex:
+            # the release name corresponds to the original title. SO no change needed
+            log.debug('The release name is already corresponding. Changed nothing.')
+            return releaseNameI
+        else:
+            # otherwise, we replace the french title by the original title
+            finalName = [title]
+            finalName.extend(separatedWords[newIndex:])
+            newReleaseName = ' '.join(finalName)
+            log.debug('The new release name is : ' + newReleaseName)
+            return newReleaseName
 

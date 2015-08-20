@@ -16,6 +16,7 @@ Or if you don't have git :
 Once installed as above, go about activating the provider as you would with any other provider in CouchPotato.
 
 Options available :
+- Ignore Year (if unchecked, release year from CP is used to narrow the search. Might want to check it is a wrong year is set on HDO side)
 - Download only torrents with at least a VO audio track
 - Download only torrents with at least a VF audio track
 - Download only torrents with at least a VFQ audio track
