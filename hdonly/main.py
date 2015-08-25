@@ -170,7 +170,7 @@ seeders, leechers))
                     if year in yearI:
                         break
                 #frTitle = res['title'].lower().replace(':','').replace('  ',' ').replace('-','')
-                frTitle = res['title'].lower().replace(':','').replace('  ',' ').replace('-',' ')
+                frTitle = res['title'].lower().replace(':','').replace('  ',' ')
                 if frTitle == title:
                     log.debug('TMDB report identical FR and original title')
                     return None
