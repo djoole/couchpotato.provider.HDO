@@ -120,11 +120,16 @@ class hdonly(TorrentProvider, MovieProvider):
                         if (self.conf('x265') and ('x265' not in detail)):
                             log.debug('x265 mandatory checked, ignoring torrent %s' % id)
                             continue
+                        if (self.conf('vf')):
+                            log.debug('VF mandatory checked and french release found, adding french keyword to release name')
+                            name = name + '.french'
+                        else:
+                            name = replaceTitle(name, title, frTitle)
                         log.debug('Torrent added to results : id %s; name %s; detail_url %s; size %s; seeders %s; leechers %s' % (id, replaceTitle(name, title, frTitle), detail_url, size, 
 seeders, leechers))
                         results.append({
                         'id': id,
-                        'name': replaceTitle(name, title, frTitle),
+                        'name': name,
                         'url': url,
                         'detail_url': detail_url,
                         'size': size,
