@@ -36,57 +36,41 @@ class hdonly(TorrentProvider, MovieProvider):
         authkey = index['response']['authkey']
         passkey = index['response']['passkey']
 
+        # title = titre référencé par CP
         if isinstance(title, str):
             title = title.decode('utf8')
-        titles = [title]
+        
+        # movieYear = année du film référencée par CP
         movieYear = str(movie['info']['year'])
+        
+        # frTitle = titre version française récupéré sur TMDB
         frTitle = self.getFrenchTitle(title, movieYear)
 
-        log.debug('Searching HD-Only for ' + title)
-        request = urllib2.quote(title.encode('iso-8859-1'))
+        log.debug('#### CP is using this movie title : ' + title)
+        log.debug('#### Searching HD-Only for the FR title : ' + frTitle)
+
+        request = urllib2.quote(frTitle.encode('iso-8859-1'))
         if (self.conf('ignoreyear')):
             searchUrl = self.urls['search'] % request
         else:
             searchUrl = (self.urls['search'] + '&year=%s') % (request, movieYear)
         data = self.getJsonData(searchUrl)
-        #log.debug('******* data : ')
-        #log.debug(data)
-
-        if frTitle is not None:
-            titles = [frTitle, title]
-            #log.debug('******* titles : ')
-            #log.debug(titles)
-            log.debug('Searching HD-Only for ' + frTitle)
-            request = urllib2.quote(frTitle.encode('iso-8859-1'))
-            if (self.conf('ignoreyear')):
-                searchUrl = self.urls['search'] % frTitle
-            else:
-                searchUrl = (self.urls['search'] + '&year=%s') % (frTitle, movieYear)
-            frData = self.getJsonData(searchUrl)
-            log.debug('******* searchUrl : ' + searchUrl)
-            log.debug('******* frData : ')
-            log.debug(frData)
-            totalData = combine(frData, data)
-            data = totalData
-            #log.debug('***************************')
-            #log.debug('******* totalData : ')
-            #log.debug(data)
 
         try:
             if data['status'] == 'success':
                 if not data['response']['results']:
-                    log.debug('No result from HD-Only with %s or %s' % (frTitle, title))
+                    log.debug('#### No result from HD-Only with ' + frTitle)
                     return
                 result = ''
                 for res in data['response']['results']:
                     release_name = h.unescape(res['groupName']).lower().replace(':','').replace('  ',' ')
-                    log.debug('release name reported by HD-Only : ' + release_name)
-                    if release_name in titles:
-                        log.debug('It\'s a match')
+                    log.debug('#### Found in HDO a movie named : ' + release_name)
+                    if release_name == frTitle or release_name == title:
+                        log.debug('#### It\'s a match')
                         result = res
                         break
                     else:
-                        log.debug('No match')
+                        log.debug('#### No match')
                 if result != '':
                     for torrent in result['torrents']:
                         id = torrent['torrentId']
@@ -100,34 +84,16 @@ class hdonly(TorrentProvider, MovieProvider):
                             detail = self.getJsonData(detail_url)['response']['torrent']['fileList'].lower()
                         else:
                             detail = self.getJsonData(detail_url)['response']['torrent']['filePath'].lower()
-                        detail = h.unescape(detail)
-                        name = detail
-                        log.debug('Filename is %s' % detail)
-                        if (seeders == 0):
-                            log.debug('0 seeders, ignoring torrent %s' % id)
-                            continue
-                        if (self.conf('vf') and not (('vf' in detail.replace('vfq','')) or ('multi' in detail.replace('vfq',''))) and title != frTitle):
-                            log.debug('VF mandatory checked, ignoring torrent %s' % id)
-                            continue
-                        if (self.conf('vfq') and ('vfq' not in detail) and title != frTitle):
-                            log.debug('VFQ mandatory checked, ignoring torrent %s' % id)
-                            continue
-                        if (self.conf('vo') and (('vf' in detail) and not (('vo' in detail) or ('multi' in detail))) and title != frTitle):
-                            log.debug('VO mandatory checked, ignoring torrent %s' % id)
-                            continue
-                        if (self.conf('multi') and ('multi' not in detail) and title != frTitle):
-                            log.debug('MULTI mandatory checked, ignoring torrent %s' % id)
-                            continue
-                        if (self.conf('x265') and ('x265' not in detail)):
-                            log.debug('x265 mandatory checked, ignoring torrent %s' % id)
-                            continue
-                        #if (self.conf('vf')):
-                        #    log.debug('VF mandatory checked and french release found, adding french keyword to release name')
-                        #    name = name + '.french'
-                        #else:
-                        #    name = replaceTitle(name, title, frTitle)
-                        log.debug('Torrent added to results : id %s; name %s; detail_url %s; size %s; seeders %s; leechers %s' % (id, replaceTitle(name, title, frTitle), detail_url, size, 
-seeders, leechers))
+                        name = h.unescape(detail)
+                        log.debug('######## ===> Found torrent : ' + name)
+                        #log.debug('######## Found torrent :')
+                        #log.debug('############ id : %s' % id)
+                        #log.debug('############ file name : ' + name)
+                        #log.debug('############ url : ' + url)
+                        #log.debug('############ detail url : ' + detail_url)
+                        #log.debug('############ size : %s' % size)
+                        #log.debug('############ seeders : %s' % seeders)
+                        #log.debug('############ leechers : %s' % leechers)
                         results.append({
                         'id': id,
                         'name': replaceTitle(name, title, frTitle),
@@ -166,7 +132,7 @@ seeders, leechers))
         """
 
         url = "https://api.themoviedb.org/3/search/movie?api_key=0f3094295d96461eb7a672626c54574d&language=fr&query=%s" % title
-        log.debug('Looking on TMDB for French title of : ' + title)
+        log.debug('#### Looking on TMDB for French title of : ' + title)
         #data = self.getJsonData(url, decode_from = 'utf8')
         data = self.getJsonData(url)
         try:
@@ -178,16 +144,16 @@ seeders, leechers))
                 #frTitle = res['title'].lower().replace(':','').replace('  ',' ').replace('-','')
                 frTitle = res['title'].lower().replace(':','').replace('  ',' ')
                 if frTitle == title:
-                    log.debug('TMDB report identical FR and original title')
+                    log.debug('#### TMDB report identical FR and original title')
                     return None
                 else:
-                    log.debug(u'L\'API TMDB a trouvé un titre français => ' + frTitle)
+                    log.debug(u'#### TMDB API found a french title : ' + frTitle)
                     return frTitle
             else:
-                log.debug('TMDB could not find a movie corresponding to : ' + title)
+                log.debug('#### TMDB could not find a movie corresponding to : ' + title)
                 return None
         except:
-            log.error('Failed to parse TMDB API: %s' % (traceback.format_exc()))
+            log.error('#### Failed to parse TMDB API: %s' % (traceback.format_exc()))
 
 def combine(dict1, dict2):
     combdict = {}
@@ -235,13 +201,13 @@ def replaceTitle(releaseNameI, titleI, newTitleI):
         # then determine if it correspoinds to the new title or old title
         if index >= newIndex:
             # the release name corresponds to the original title. SO no change needed
-            log.debug('The release name is already corresponding. Changed nothing.')
+            log.debug('############ The release name is already corresponding. Changed nothing.')
             return releaseNameI
         else:
             # otherwise, we replace the french title by the original title
             finalName = [title]
             finalName.extend(separatedWords[newIndex:])
             newReleaseName = ' '.join(finalName)
-            log.debug('The new release name is : ' + newReleaseName)
+            log.debug('############ The new release name is : ' + newReleaseName)
             return newReleaseName
 
