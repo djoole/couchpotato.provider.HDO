@@ -45,6 +45,8 @@ class hdonly(TorrentProvider, MovieProvider):
         
         # frTitle = titre version française récupéré sur TMDB
         frTitle = self.getFrenchTitle(title, movieYear)
+        if frTitle is None:
+            frTitle = title
 
         log.debug('#### CP is using this movie title : ' + title)
         log.debug('#### Searching HD-Only for the FR title : ' + frTitle)
