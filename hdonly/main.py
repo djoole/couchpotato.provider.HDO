@@ -90,7 +90,7 @@ class hdonly(TorrentProvider, MovieProvider):
                 if result != '':
                     for torrent in result['torrents']:
                         id = torrent['torrentId']
-                        name = release_name + '.' + str(result['groupYear']) + '.' + torrent['encoding'] + '.' + torrent['media'] + '.' + torrent['format']
+                        #name = release_name + '.' + str(result['groupYear']) + '.' + torrent['encoding'] + '.' + torrent['media'] + '.' + torrent['format']
                         url = self.urls['download'] % (torrent['torrentId'], authkey, passkey)
                         detail_url = self.urls['detail'] % id
                         size = tryInt(torrent['size']) / 1024 / 1024
@@ -101,6 +101,7 @@ class hdonly(TorrentProvider, MovieProvider):
                         else:
                             detail = self.getJsonData(detail_url)['response']['torrent']['filePath'].lower()
                         detail = h.unescape(detail)
+                        name = detail
                         log.debug('Filename is %s' % detail)
                         if (seeders == 0):
                             log.debug('0 seeders, ignoring torrent %s' % id)
@@ -120,16 +121,16 @@ class hdonly(TorrentProvider, MovieProvider):
                         if (self.conf('x265') and ('x265' not in detail)):
                             log.debug('x265 mandatory checked, ignoring torrent %s' % id)
                             continue
-                        if (self.conf('vf')):
-                            log.debug('VF mandatory checked and french release found, adding french keyword to release name')
-                            name = name + '.french'
-                        else:
-                            name = replaceTitle(name, title, frTitle)
+                        #if (self.conf('vf')):
+                        #    log.debug('VF mandatory checked and french release found, adding french keyword to release name')
+                        #    name = name + '.french'
+                        #else:
+                        #    name = replaceTitle(name, title, frTitle)
                         log.debug('Torrent added to results : id %s; name %s; detail_url %s; size %s; seeders %s; leechers %s' % (id, replaceTitle(name, title, frTitle), detail_url, size, 
 seeders, leechers))
                         results.append({
                         'id': id,
-                        'name': name,
+                        'name': replaceTitle(name, title, frTitle),
                         'url': url,
                         'detail_url': detail_url,
                         'size': size,
