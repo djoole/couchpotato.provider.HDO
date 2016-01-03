@@ -51,7 +51,8 @@ class hdonly(TorrentProvider, MovieProvider):
         log.debug('#### CP is using this movie title : ' + title)
         log.debug('#### Searching HD-Only for the FR title : ' + frTitle)
 
-        request = urllib2.quote(frTitle.encode('iso-8859-1'))
+        #request = urllib2.quote(frTitle.encode('iso-8859-1'))
+        request = urllib2.quote(frTitle.encode('utf8'))
         if (self.conf('ignoreyear')):
             searchUrl = self.urls['search'] % request
         else:
